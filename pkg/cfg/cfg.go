@@ -22,3 +22,20 @@ func InitiateClient(r string) (aws.Config, error) {
 
 	return cfg, err
 }
+
+func InitiateClientWithProfile(r, p string) (aws.Config, error) {
+	ctx := context.TODO()
+
+	cfg, err := config.LoadDefaultConfig(
+		ctx,
+		config.WithRegion(r),
+		config.WithSharedConfigProfile(p),
+	)
+
+	if err != nil {
+		log.Fatal("Failed to initialize AWS client.")
+	}
+
+	return cfg, err
+}
+
