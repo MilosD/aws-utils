@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"time"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	ec2 "github.com/aws/aws-sdk-go-v2/service/ec2"
@@ -52,5 +53,36 @@ func CreateInstance(cfg aws.Config, ami, instanceType, key, subnet, instanceProf
 
 	for id := range instanceId {
 		fmt.Println("Launched instance with Id:", id)
+	}
+}
+
+func DeleteInstance(cfg aws.Config, i string) {
+	client := ec2.NewFromConfig(cfg)
+	ctx := context.TODO()
+
+	var ids []string
+	ids = append(ids, i)
+
+	input := &ec2.TerminateInstancesInput{
+		InstanceIds: ids,
+	}
+
+	out, err := client.TerminateInstances(ctx, input)
+
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	for _, t := range out.TerminatingInstances {
+		var terminatedCode *int32
+		status := t.CurrentState.Code
+
+		for {
+			time.Sleep(10 * time.Second)
+			if status == terminatedCode {
+				fmt.Println("Instance with Id" + i + "successfully terminated")
+				break
+			}
+		}
 	}
 }
